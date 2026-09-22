@@ -1,0 +1,1827 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arwa Mahmood — Frontend & React Developer Portfolio</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            950: '#030712',
+                            900: '#0a1128',
+                            800: '#101d42',
+                            700: '#1c2d5a',
+                        },
+                        cyan: {
+                            glow: '#00f0ff',
+                            light: '#38bdf8',
+                            electric: '#00dbde'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        heading: ['Syne', 'sans-serif'],
+                        code: ['Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- GSAP & ScrollTrigger Plugins -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/TextPlugin.min.js"></script>
+
+    <!-- Three.js for 3D Interactive WebGL Particles -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Lenis Smooth Scroll -->
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+
+    <style>
+        body {
+            background-color: #030712;
+            color: #f8fafc;
+            overflow-x: hidden;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        /* Ambient Glow Effects */
+        .glow-cyan-lg {
+            box-shadow: 0 0 50px -10px rgba(0, 240, 255, 0.35);
+        }
+
+        .glow-cyan-sm {
+            box-shadow: 0 0 20px -5px rgba(56, 189, 248, 0.4);
+        }
+
+        .text-glow {
+            text-shadow: 0 0 15px rgba(56, 189, 248, 0.6);
+        }
+
+        /* Glassmorphism Cards */
+        .glass-card {
+            background: rgba(10, 17, 40, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(56, 189, 248, 0.18);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(0, 240, 255, 0.45);
+            box-shadow: 0 10px 30px -10px rgba(0, 240, 255, 0.2);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #030712;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #1c2d5a;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #38bdf8;
+        }
+
+        /* Three.js Canvas */
+        #webgl-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Custom Dual-Ring Cursor */
+        .cursor-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #00f0ff;
+            box-shadow: 0 0 10px #00f0ff;
+        }
+
+        .cursor-ring {
+            width: 36px;
+            height: 36px;
+            border: 1px solid rgba(56, 189, 248, 0.6);
+            transition: transform 0.15s ease-out, width 0.2s, height 0.2s, border-color 0.2s;
+        }
+
+        /* Glowing Avatar Frame */
+        .avatar-frame {
+            position: relative;
+            border-radius: 2rem;
+            padding: 4px;
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.8), rgba(0, 240, 255, 0.2), rgba(16, 29, 66, 0.9));
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.3);
+        }
+    </style>
+</head>
+
+<body class="relative selection:bg-cyan-light selection:text-navy-950">
+
+    <!-- WebGL Particle Background -->
+    <canvas id="webgl-bg"></canvas>
+
+    <!-- Custom Cursor Pointer -->
+    <div id="cursor-dot"
+        class="cursor-dot fixed top-0 left-0 rounded-full pointer-events-none z-50 transform -translate-x-1/2 -translate-y-1/2 hidden md:block">
+    </div>
+    <div id="cursor-ring"
+        class="cursor-ring fixed top-0 left-0 rounded-full pointer-events-none z-50 transform -translate-x-1/2 -translate-y-1/2 hidden md:block">
+    </div>
+
+    <!-- Notification Toast Popup -->
+    <div id="toast"
+        class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none glass-card px-5 py-3 rounded-xl border border-cyan-glow text-cyan-glow font-code text-sm flex items-center gap-3 shadow-2xl">
+        <i class="fa-solid fa-circle-check text-base"></i>
+        <span id="toast-message">Email copied to clipboard!</span>
+    </div>
+
+    <!-- Navigation Bar -->
+    <header class="fixed top-0 left-0 w-full z-40 px-3 sm:px-6 py-3 sm:py-4 transition-all duration-300" id="main-nav">
+        <div class="max-w-7xl mx-auto flex items-center justify-between glass-card px-4 sm:px-6 py-3 rounded-2xl">
+            <!-- Logo -->
+            <a href="#hero" class="flex items-center gap-2 group">
+                <div
+                    class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-navy-800 border border-cyan-light/30 flex items-center justify-center font-heading font-bold text-cyan-light group-hover:border-cyan-glow transition-all">
+                    AK
+                </div>
+                <span class="font-heading font-bold text-base sm:text-lg text-white tracking-wide">
+                    Arwa<span class="text-cyan-light">.dev</span>
+                </span>
+            </a>
+
+            <!-- Navigation Links -->
+            <nav class="hidden lg:flex items-center gap-6 font-code text-xs sm:text-sm text-slate-300">
+                <a href="#about" class="hover:text-cyan-light transition-colors flex items-center gap-1.5"><span
+                        class="text-cyan-light text-xs">01.</span> About</a>
+                <a href="#skills" class="hover:text-cyan-light transition-colors flex items-center gap-1.5"><span
+                        class="text-cyan-light text-xs">02.</span> Skills</a>
+                <a href="#projects" class="hover:text-cyan-light transition-colors flex items-center gap-1.5"><span
+                        class="text-cyan-light text-xs">03.</span> Projects</a>
+                <a href="#experience" class="hover:text-cyan-light transition-colors flex items-center gap-1.5"><span
+                        class="text-cyan-light text-xs">04.</span> Timeline</a>
+                <a href="#contact" class="hover:text-cyan-light transition-colors flex items-center gap-1.5"><span
+                        class="text-cyan-light text-xs">05.</span> Contact</a>
+            </nav>
+
+            <!-- Status Indicator & CTA -->
+            <div class="flex items-center gap-2 sm:gap-4">
+                <div
+                    class="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-full bg-navy-900/80 border border-emerald-500/30 text-xs font-code text-emerald-400">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    Available for Work
+                </div>
+                <a href="#contact"
+                    class="px-3.5 sm:px-4 py-2 rounded-xl bg-cyan-light/10 border border-cyan-light/40 text-cyan-light font-code text-xs hover:bg-cyan-light hover:text-navy-950 font-bold transition-all duration-300 glow-cyan-sm">
+                    Hire Me
+                </a>
+            </div>
+        </div>
+        <!-- Mobile Dropdown Navigation Bar (Always Visible Stack for smaller devices) -->
+        <div
+            class="flex lg:hidden items-center justify-center gap-3 sm:gap-5 mt-2.5 font-code text-[11px] sm:text-xs text-slate-300 overflow-x-auto py-1 px-2 glass-card rounded-xl max-w-7xl mx-auto">
+            <a href="#about" class="hover:text-cyan-light transition-colors shrink-0">01.About</a>
+            <a href="#skills" class="hover:text-cyan-light transition-colors shrink-0">02.Skills</a>
+            <a href="#projects" class="hover:text-cyan-light transition-colors shrink-0">03.Projects</a>
+            <a href="#experience" class="hover:text-cyan-light transition-colors shrink-0">04.Timeline</a>
+            <a href="#contact" class="hover:text-cyan-light transition-colors shrink-0">05.Contact</a>
+        </div>
+    </header>
+
+    <!-- Main Wrapper -->
+    <main class="relative z-10 pt-36 sm:pt-28">
+
+        <!-- Hero Section Container -->
+        <section id="hero"
+            class="min-h-[85vh] sm:min-h-[92vh] flex items-center justify-center px-4 sm:px-6 relative py-12 sm:py-16 overflow-hidden bg-navy-950 select-none">
+
+            <!-- 1. HOLOGRAPHIC CANVAS BACKGROUND -->
+            <canvas id="hero-holo-canvas"
+                class="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-70"></canvas>
+
+            <!-- 2. AMBIENT GLOW ORBS & CYBER MESH -->
+            <div
+                class="absolute inset-0 bg-[radial-gradient(#00f0ff0f_1px,transparent_1px)] [background-size:32px_32px] pointer-events-none z-0">
+            </div>
+            <div
+                class="absolute -top-40 -left-40 w-[600px] h-[600px] bg-cyan-light/10 rounded-full blur-[150px] pointer-events-none animate-pulse [animation-duration:8s]">
+            </div>
+            <div
+                class="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[150px] pointer-events-none animate-pulse [animation-duration:10s]">
+            </div>
+
+            <div
+                class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center relative z-10">
+
+                <!-- LEFT COLUMN: Content & Interactive Command Line -->
+                <div class="lg:col-span-7 flex flex-col justify-center">
+
+                    <!-- Live Status Badge -->
+                    <div
+                        class="hero-anim inline-flex items-center gap-2.5 px-3.5 sm:px-4 py-2 rounded-full bg-navy-900/90 border border-cyan-light/40 text-cyan-light font-code text-[11px] sm:text-xs w-max mb-6 shadow-[0_0_20px_rgba(0,240,255,0.2)] backdrop-blur-md">
+                        <span class="relative flex h-2.5 w-2.5 shrink-0">
+                            <span
+                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-light opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-light"></span>
+                        </span>
+                        <span class="tracking-wide">BSCS Student & Frontend Developer</span>
+                    </div>
+
+                    <!-- Title -->
+                    <h1
+                        class="hero-anim font-heading font-extrabold text-3xl sm:text-6xl lg:text-7xl text-white tracking-tight mb-6 leading-[1.1]">
+                        Crafting <span
+                            class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-light via-cyan-glow to-blue-400 text-glow">Interactive</span>
+                        <br>
+                        Web Experiences.
+                    </h1>
+
+                    <!-- Interactive Terminal Prompt Box (Stylized as Rounded Capsule/Terminal) -->
+                    <div
+                        class="hero-anim mb-6 rounded-3xl bg-navy-900/90 border border-slate-800 p-4 sm:p-5 backdrop-blur-xl shadow-2xl max-w-xl">
+                        <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
+                            <div class="flex gap-2">
+                                <span class="w-3 h-3 rounded-full bg-red-500/80 inline-block"></span>
+                                <span class="w-3 h-3 rounded-full bg-yellow-500/80 inline-block"></span>
+                                <span class="w-3 h-3 rounded-full bg-green-500/80 inline-block"></span>
+                            </div>
+                            <span class="text-[11px] font-code text-slate-500">bash — arwa@portfolio:~</span>
+                        </div>
+
+                        <div
+                            class="font-code text-xs sm:text-sm text-slate-300 min-h-[36px] flex items-center gap-2 overflow-x-auto">
+                            <span class="text-cyan-light font-bold shrink-0">$</span>
+                            <span id="typewriter" class="text-white font-medium whitespace-nowrap"></span>
+                            <span class="w-2 h-4 bg-cyan-glow shrink-0 inline-block animate-pulse"></span>
+                        </div>
+
+                        <!-- Interactive Quick-Command Pills -->
+                        <div class="flex flex-wrap gap-2 pt-3 border-t border-slate-800/60 mt-3 text-xs font-code">
+                            <span class="text-slate-500 self-center text-[11px]">Quick Run:</span>
+                            <button onclick="runCommand('skills')"
+                                class="px-3 py-1.5 rounded-full bg-navy-950 border border-slate-800 text-cyan-light hover:border-cyan-light/50 transition-all active:scale-95">
+                                > view_stack()
+                            </button>
+                            <button onclick="runCommand('contact')"
+                                class="px-3 py-1.5 rounded-full bg-navy-950 border border-slate-800 text-cyan-light hover:border-cyan-light/50 transition-all active:scale-95">
+                                > copy_email()
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Hero Description -->
+                    <p class="hero-anim text-slate-300 text-sm sm:text-lg max-w-2xl leading-relaxed mb-8">
+                        Hi, I'm <strong class="text-white font-semibold">Arwa Mahmood</strong>. I specialize in building
+                        high-performance, interactive web applications using
+                        <span
+                            class="text-cyan-light font-medium underline decoration-cyan-light/30 underline-offset-4">React.js</span>,
+                        <span
+                            class="text-cyan-light font-medium underline decoration-cyan-light/30 underline-offset-4">Tailwind
+                            CSS</span>, and
+                        <span
+                            class="text-cyan-light font-medium underline decoration-cyan-light/30 underline-offset-4">GSAP</span>.
+                    </p>
+
+                    <!-- CTA Buttons -->
+                    <div class="hero-anim flex flex-wrap items-center gap-4 mb-10">
+                        <a href="#projects"
+                            class="px-6 sm:px-8 py-3.5 sm:py-4 rounded-full bg-gradient-to-r from-cyan-light to-cyan-electric text-navy-950 font-bold text-xs sm:text-sm hover:scale-105 hover:shadow-[0_0_30px_rgba(0,240,255,0.4)] transition-all duration-300 flex items-center gap-2 group">
+                            <span>Explore Projects</span>
+                            <i
+                                class="fa-solid fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                        <a href="https://github.com/Arvaa11/" target="_blank" rel="noopener noreferrer"
+                            class="px-6 sm:px-8 py-3.5 sm:py-4 rounded-full bg-navy-900/80 border border-slate-700 hover:border-cyan-light/60 text-white font-bold text-xs sm:text-sm hover:text-cyan-light transition-all duration-300 flex items-center gap-2.5 backdrop-blur-md shadow-lg">
+                            <i class="fa-brands fa-github text-lg text-cyan-light"></i>
+                            <span>GitHub Profile</span>
+                        </a>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT COLUMN: Fully Circular 3D Interactive Frame -->
+                <div
+                    class="lg:col-span-5 flex justify-center hero-anim relative [perspective:1000px] w-full px-4 sm:px-0">
+
+                    <div id="tilt-card"
+                        class="relative max-w-xs sm:max-w-sm w-full aspect-square transition-transform duration-200 ease-out transform-gpu flex items-center justify-center">
+
+                        <!-- Rotating 3D Outer Cyber Ring (Perfect Circle) -->
+                        <div
+                            class="absolute -inset-4 sm:-inset-6 rounded-full border-2 border-dashed border-cyan-light/40 animate-[spin_20s_linear_infinite] pointer-events-none">
+                        </div>
+
+                        <!-- Floating Tech Pill: React -->
+                        <div
+                            class="absolute -top-2 left-0 z-30 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-full bg-navy-900/95 border border-cyan-light/50 text-cyan-light font-code text-[11px] sm:text-xs font-semibold flex items-center gap-2 shadow-[0_0_20px_rgba(0,240,255,0.25)] backdrop-blur-md">
+                            <i
+                                class="fa-brands fa-react text-sm sm:text-base animate-spin [animation-duration:10s]"></i>
+                            <span>React.js</span>
+                        </div>
+
+                        <!-- Floating Tech Pill: Tailwind -->
+                        <div
+                            class="absolute top-1/2 -right-4 sm:-right-6 z-30 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-full bg-navy-900/95 border border-cyan-light/50 text-cyan-light font-code text-[11px] sm:text-xs font-semibold flex items-center gap-2 shadow-[0_0_20px_rgba(0,240,255,0.25)] backdrop-blur-md">
+                            <i class="fa-solid fa-wind text-sm sm:text-base"></i>
+                            <span>Tailwind</span>
+                        </div>
+
+                        <!-- Floating Tech Pill: GSAP -->
+                        <div
+                            class="absolute -bottom-2 left-2 z-30 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-full bg-navy-900/95 border border-cyan-light/50 text-cyan-light font-code text-[11px] sm:text-xs font-semibold flex items-center gap-2 shadow-[0_0_20px_rgba(0,240,255,0.25)] backdrop-blur-md">
+                            <i class="fa-solid fa-bolt text-sm sm:text-base text-yellow-400"></i>
+                            <span>GSAP</span>
+                        </div>
+
+                        <!-- Glass Prism Main Circular Frame -->
+                        <div
+                            class="relative w-full h-full rounded-full overflow-hidden bg-navy-900/90 border-2 border-slate-800 shadow-[0_0_60px_rgba(0,240,255,0.15)] group">
+                            <img src="Picture.png" alt="Arwa Mahmood"
+                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                                onerror="this.src='https://placehold.co/400x400/0a1128/00f0ff?text=Arwa+Mahmood'">
+
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-navy-950 via-transparent to-transparent opacity-80 pointer-events-none">
+                            </div>
+
+                            <!-- Bottom Info Circular Glass Capsule -->
+                            <div
+                                class="absolute bottom-4 left-1/2 -translate-x-1/2 w-[90%] p-2.5 sm:p-3 rounded-full bg-navy-900/90 border border-slate-700/80 backdrop-blur-xl flex items-center justify-between shadow-xl">
+                                <div class="flex items-center gap-2.5 pl-1">
+                                    <div
+                                        class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-cyan-light/10 border border-cyan-light/30 flex items-center justify-center text-cyan-light text-sm">
+                                        <i class="fa-solid fa-laptop-code"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-white font-heading font-bold text-xs">Arwa Mahmood</div>
+                                        <div class="text-cyan-light font-code text-[10px]">Frontend Dev</div>
+                                    </div>
+                                </div>
+                                <div
+                                    class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-code pr-3">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                    <span>Online</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SCRIPTS: 3D TILT EFFECT & HOLOGRAPHIC CANVAS -->
+        <script>
+            // 1. 3D Tilt Effect on Mouse Move
+            const tiltCard = document.getElementById('tilt-card');
+            if (tiltCard) {
+                const container = tiltCard.parentElement;
+                container.addEventListener('mousemove', (e) => {
+                    const rect = container.getBoundingClientRect();
+                    const x = e.clientX - rect.left - rect.width / 2;
+                    const y = e.clientY - rect.top - rect.height / 2;
+                    const rotateX = (-y / rect.height) * 20;
+                    const rotateY = (x / rect.width) * 20;
+                    tiltCard.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                });
+
+                container.addEventListener('mouseleave', () => {
+                    tiltCard.style.transform = `rotateX(0deg) rotateY(0deg)`;
+                });
+            }
+
+            // 2. Terminal Quick Commands
+            function runCommand(cmd) {
+                const typewriter = document.getElementById('typewriter');
+                if (!typewriter) return;
+
+                if (cmd === 'skills') {
+                    typewriter.textContent = "Stack: React.js, Tailwind CSS, GSAP, JavaScript (ES6+)";
+                } else if (cmd === 'contact') {
+                    typewriter.textContent = "Email copied to clipboard! Ready to collaborate.";
+                    navigator.clipboard?.writeText('arwa@example.com');
+                }
+            }
+
+            // 3. Holographic Grid Starfield Canvas
+            (function initHoloCanvas() {
+                const canvas = document.getElementById('hero-holo-canvas');
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+
+                let w = canvas.width = canvas.parentElement.offsetWidth;
+                let h = canvas.height = canvas.parentElement.offsetHeight;
+
+                window.addEventListener('resize', () => {
+                    if (!canvas.parentElement) return;
+                    w = canvas.width = canvas.parentElement.offsetWidth;
+                    h = canvas.height = canvas.parentElement.offsetHeight;
+                });
+
+                const nodes = Array.from({ length: 45 }, () => ({
+                    x: Math.random() * w,
+                    y: Math.random() * h,
+                    r: Math.random() * 1.5 + 0.8,
+                    vx: (Math.random() - 0.5) * 0.3,
+                    vy: (Math.random() - 0.5) * 0.3,
+                    color: Math.random() > 0.4 ? '#00f0ff' : '#3b82f6'
+                }));
+
+                function draw() {
+                    ctx.clearRect(0, 0, w, h);
+
+                    nodes.forEach((n, i) => {
+                        n.x += n.vx;
+                        n.y += n.vy;
+
+                        if (n.x < 0) n.x = w;
+                        if (n.x > w) n.x = 0;
+                        if (n.y < 0) n.y = h;
+                        if (n.y > h) n.y = 0;
+
+                        ctx.beginPath();
+                        ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+                        ctx.fillStyle = n.color;
+                        ctx.fill();
+
+                        // Draw subtle connecting lines between near nodes
+                        for (let j = i + 1; j < nodes.length; j++) {
+                            const n2 = nodes[j];
+                            const dist = Math.hypot(n.x - n2.x, n.y - n2.y);
+                            if (dist < 100) {
+                                ctx.beginPath();
+                                ctx.moveTo(n.x, n.y);
+                                ctx.lineTo(n2.x, n2.y);
+                                ctx.strokeStyle = '#00f0ff';
+                                ctx.globalAlpha = (1 - dist / 100) * 0.15;
+                                ctx.stroke();
+                                ctx.globalAlpha = 1;
+                            }
+                        }
+                    });
+
+                    requestAnimationFrame(draw);
+                }
+                draw();
+            })();
+        </script>
+
+        <!-- About Section -->
+        <section id="about" class="py-16 sm:py-20 px-4 sm:px-6 relative bg-navy-950 overflow-hidden">
+
+            <!-- Ambient Blur Background -->
+            <div
+                class="absolute top-1/2 left-0 w-96 h-96 bg-cyan-light/10 rounded-full blur-[140px] pointer-events-none">
+            </div>
+            <div
+                class="absolute bottom-0 right-0 w-96 h-96 bg-blue-600/10 rounded-full blur-[140px] pointer-events-none">
+            </div>
+
+            <div class="max-w-7xl mx-auto relative z-10">
+
+                <!-- Section Header -->
+                <div class="flex flex-col items-center text-center mb-12 sm:mb-16">
+                    <div
+                        class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-navy-900 border border-cyan-light/30 text-cyan-light font-code text-xs mb-3 shadow-[0_0_15px_rgba(0,240,255,0.1)]">
+                        <i class="fa-solid fa-user text-xs"></i>
+                        <span>Get To Know Me</span>
+                    </div>
+                    <h2 class="font-heading text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+                        About <span
+                            class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-light to-cyan-glow">Arwa
+                            Mahmood</span>
+                    </h2>
+                    <p class="text-slate-400 text-sm sm:text-base max-w-xl mt-3 font-sans px-2">
+                        Combining Computer Science fundamentals with creative web development to build memorable digital
+                        products.
+                    </p>
+                </div>
+
+                <!-- Bento Grid Container -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+
+                    <!-- Card 1: My Story & Education (Span 8) -->
+                    <div
+                        class="md:col-span-8 p-6 sm:p-8 rounded-3xl bg-navy-900/80 border border-slate-800/80 backdrop-blur-xl shadow-xl flex flex-col justify-between relative overflow-hidden group hover:border-cyan-light/40 transition-colors duration-500">
+                        <div
+                            class="absolute -right-10 -bottom-10 w-40 h-40 bg-cyan-light/5 rounded-full blur-2xl group-hover:bg-cyan-light/10 transition-all">
+                        </div>
+
+                        <div>
+                            <div class="flex items-center gap-3 mb-4">
+                                <div
+                                    class="w-10 h-10 rounded-xl bg-cyan-light/10 border border-cyan-light/30 flex items-center justify-center text-cyan-light">
+                                    <i class="fa-solid fa-graduation-cap text-lg"></i>
+                                </div>
+                                <h3 class="text-lg sm:text-xl font-bold font-heading text-white">Academic & Technical
+                                    Journey</h3>
+                            </div>
+
+                            <p class="text-slate-300 text-sm sm:text-base leading-relaxed mb-4">
+                                I am a <strong class="text-white">BS Computer Science student</strong> passionate about
+                                transforming ideas into clean, functional code. My focus lies at the intersection of
+                                modern front-end design systems and smooth user interactions.
+                            </p>
+                            <p class="text-slate-400 text-xs sm:text-base leading-relaxed">
+                                Through hands-on project experience, I have developed expertise in building scalable
+                                React applications, styling complex responsive UIs with Tailwind CSS, and bringing web
+                                pages to life with GSAP motion graphics.
+                            </p>
+                        </div>
+
+                        <!-- Education Pill Tag -->
+                        <div
+                            class="mt-6 pt-6 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-4">
+                            <div class="flex items-center gap-2 text-xs font-code text-cyan-light">
+                                <i class="fa-solid fa-university"></i>
+                                <span>BS CS Undergraduate</span>
+                            </div>
+                            <span class="text-[11px] sm:text-xs font-code text-slate-500">Focus: Software Engineering &
+                                Web Architecture</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Quick Highlights / Stats (Span 4) -->
+                    <div
+                        class="md:col-span-4 p-6 sm:p-8 rounded-3xl bg-navy-900/80 border border-slate-800/80 backdrop-blur-xl shadow-xl flex flex-col justify-between hover:border-cyan-light/40 transition-colors duration-500">
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                            <span class="text-xs font-code text-slate-400 font-bold uppercase tracking-wider">Status
+                                Console</span>
+                            <span
+                                class="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-code">
+                                ● Available
+                            </span>
+                        </div>
+
+                        <div class="space-y-4 my-4">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded-lg bg-cyan-light/10 border border-cyan-light/30 flex items-center justify-center text-cyan-light text-xs shrink-0">
+                                    <i class="fa-solid fa-code"></i>
+                                </div>
+                                <div>
+                                    <div class="text-[11px] font-code text-slate-400">Primary Stack</div>
+                                    <div class="text-xs font-bold text-white">React, Tailwind, GSAP, Vite</div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded-lg bg-cyan-light/10 border border-cyan-light/30 flex items-center justify-center text-cyan-light text-xs shrink-0">
+                                    <i class="fa-solid fa-laptop-code"></i>
+                                </div>
+                                <div>
+                                    <div class="text-[11px] font-code text-slate-400">Specialization</div>
+                                    <div class="text-xs font-bold text-cyan-light">Frontend Architecture & UI/UX</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-3 border-t border-slate-800 text-right">
+                            <span class="text-[11px] font-code text-slate-400">Location: Open to Remote</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Interactive Tech Orbit Section (Full Width Span 12) -->
+                    <div
+                        class="md:col-span-12 p-6 sm:p-8 rounded-3xl bg-navy-900/90 border border-slate-800/80 backdrop-blur-xl shadow-2xl relative overflow-hidden">
+
+                        <!-- Orbit Header -->
+                        <div
+                            class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-8 border-b border-slate-800">
+                            <div class="flex items-center gap-2">
+                                <i
+                                    class="fa-solid fa-compass-drafting text-cyan-light text-sm animate-spin [animation-duration:12s]"></i>
+                                <span
+                                    class="text-xs font-code text-white font-bold tracking-wider uppercase">Interactive
+                                    Tech Orbit</span>
+                            </div>
+                            <span
+                                class="text-[11px] font-code text-cyan-light bg-cyan-light/10 border border-cyan-light/30 px-3 py-1 rounded-full w-fit">
+                                Hover / Tap Node to Inspect
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+
+                            <!-- Interactive Orbit Visual (Span 7) -->
+                            <div
+                                class="lg:col-span-7 flex justify-center items-center relative min-h-[280px] sm:min-h-[320px] overflow-hidden">
+
+                                <!-- Central Glowing Core -->
+                                <div
+                                    class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-cyan-light to-blue-600 flex items-center justify-center shadow-[0_0_50px_rgba(0,240,255,0.4)] z-10 border-2 border-white/20">
+                                    <div class="text-center">
+                                        <i
+                                            class="fa-solid fa-atom text-navy-950 text-xl sm:text-2xl animate-spin [animation-duration:8s]"></i>
+                                        <div class="text-[10px] font-code font-bold text-navy-950 mt-0.5">CORE</div>
+                                    </div>
+                                </div>
+
+                                <!-- Orbiting Track Ring -->
+                                <div
+                                    class="absolute w-56 h-56 sm:w-80 sm:h-80 rounded-full border border-dashed border-cyan-light/30 animate-[spin_25s_linear_infinite] pointer-events-none">
+                                </div>
+
+                                <!-- Orbit Nodes Container -->
+                                <div id="orbit-ring" class="absolute inset-0 flex items-center justify-center">
+
+                                    <!-- Node 1: React -->
+                                    <div class="orbit-node absolute w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-navy-950 border border-cyan-light/60 flex items-center justify-center text-cyan-light shadow-[0_0_15px_rgba(0,240,255,0.2)] cursor-pointer hover:scale-125 hover:border-cyan-light transition-all duration-300"
+                                        onmouseenter="updateOrbitDetail('React.js', 'Core Framework', 'Building component-driven SPAs with clean architecture, custom hooks, and high-performance state management.')"
+                                        onclick="updateOrbitDetail('React.js', 'Core Framework', 'Building component-driven SPAs with clean architecture, custom hooks, and high-performance state management.')">
+                                        <i class="fa-brands fa-react text-lg sm:text-xl"></i>
+                                    </div>
+
+                                    <!-- Node 2: Tailwind -->
+                                    <div class="orbit-node absolute w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-navy-950 border border-cyan-light/60 flex items-center justify-center text-cyan-light shadow-[0_0_15px_rgba(0,240,255,0.2)] cursor-pointer hover:scale-125 hover:border-cyan-light transition-all duration-300"
+                                        onmouseenter="updateOrbitDetail('Tailwind CSS', 'Utility-First Styling', 'Crafting custom responsive layouts, dark-mode systems, and sleek glassmorphism themes efficiently.')"
+                                        onclick="updateOrbitDetail('Tailwind CSS', 'Utility-First Styling', 'Crafting custom responsive layouts, dark-mode systems, and sleek glassmorphism themes efficiently.')">
+                                        <i class="fa-solid fa-wind text-base sm:text-lg"></i>
+                                    </div>
+
+                                    <!-- Node 3: GSAP -->
+                                    <div class="orbit-node absolute w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-navy-950 border border-cyan-light/60 flex items-center justify-center text-cyan-light shadow-[0_0_15px_rgba(0,240,255,0.2)] cursor-pointer hover:scale-125 hover:border-cyan-light transition-all duration-300"
+                                        onmouseenter="updateOrbitDetail('GSAP Motion', 'Animation Library', 'Implementing complex scroll-triggered scenes, timeline sequences, and fluid micro-interactions.')"
+                                        onclick="updateOrbitDetail('GSAP Motion', 'Animation Library', 'Implementing complex scroll-triggered scenes, timeline sequences, and fluid micro-interactions.')">
+                                        <i class="fa-solid fa-bolt text-base sm:text-lg text-yellow-400"></i>
+                                    </div>
+
+                                    <!-- Node 4: JavaScript -->
+                                    <div class="orbit-node absolute w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-navy-950 border border-cyan-light/60 flex items-center justify-center text-cyan-light shadow-[0_0_15px_rgba(0,240,255,0.2)] cursor-pointer hover:scale-125 hover:border-cyan-light transition-all duration-300"
+                                        onmouseenter="updateOrbitDetail('JavaScript (ES6+)', 'Core Language', 'Writing clean async code, DOM manipulations, and modular functional programming pattern designs.')"
+                                        onclick="updateOrbitDetail('JavaScript (ES6+)', 'Core Language', 'Writing clean async code, DOM manipulations, and modular functional programming pattern designs.')">
+                                        <i class="fa-brands fa-js text-base sm:text-lg text-yellow-300"></i>
+                                    </div>
+
+                                    <!-- Node 5: Vite -->
+                                    <div class="orbit-node absolute w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-navy-950 border border-cyan-light/60 flex items-center justify-center text-cyan-light shadow-[0_0_15px_rgba(0,240,255,0.2)] cursor-pointer hover:scale-125 hover:border-cyan-light transition-all duration-300"
+                                        onmouseenter="updateOrbitDetail('Vite.js', 'Build Tooling', 'Optimized HMR development environments and lightning-fast production bundle compilation.')"
+                                        onclick="updateOrbitDetail('Vite.js', 'Build Tooling', 'Optimized HMR development environments and lightning-fast production bundle compilation.')">
+                                        <i class="fa-solid fa-bolt-lightning text-base sm:text-lg text-purple-400"></i>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <!-- Node Details Display Panel (Span 5) -->
+                            <div
+                                class="lg:col-span-5 p-5 sm:p-6 rounded-2xl bg-navy-950/80 border border-slate-800/90 font-code">
+                                <div class="text-xs text-slate-500 mb-1">// Selected Orbit Node</div>
+                                <h4 id="orbit-title" class="text-lg sm:text-xl font-bold font-heading text-white mb-1">
+                                    React.js
+                                </h4>
+                                <div id="orbit-category" class="text-xs text-cyan-light mb-4">Core Framework</div>
+                                <p id="orbit-desc" class="text-xs text-slate-300 leading-relaxed min-h-[60px]">
+                                    Building component-driven SPAs with clean architecture, custom hooks, and
+                                    high-performance state management.
+                                </p>
+                                <div
+                                    class="mt-4 pt-4 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+                                    <span>Status: Production Active</span>
+                                    <span class="text-emerald-400">100% Mastered</span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Card 4: Core Principles / Values (Span 4) -->
+                    <div
+                        class="md:col-span-4 p-6 rounded-3xl bg-navy-900/80 border border-slate-800/80 backdrop-blur-xl shadow-xl flex flex-col justify-between hover:border-cyan-light/40 transition-colors">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-cyan-light/10 border border-cyan-light/30 flex items-center justify-center text-cyan-light mb-4">
+                            <i class="fa-solid fa-microchip text-lg"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-bold font-heading text-white mb-2">Performance First</h4>
+                            <p class="text-slate-400 text-sm leading-relaxed">
+                                Writing clean, optimized, and maintainable code ensuring lightning-fast load times and
+                                seamless cross-browser accessibility.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Card 5: Interactive Design Principle (Span 4) -->
+                    <div
+                        class="md:col-span-4 p-6 rounded-3xl bg-navy-900/80 border border-slate-800/80 backdrop-blur-xl shadow-xl flex flex-col justify-between hover:border-cyan-light/40 transition-colors">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-cyan-light/10 border border-cyan-light/30 flex items-center justify-center text-cyan-light mb-4">
+                            <i class="fa-solid fa-layer-group text-lg"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-bold font-heading text-white mb-2">Component-Driven</h4>
+                            <p class="text-slate-400 text-sm leading-relaxed">
+                                Architecting modular React components with atomic principles for high reusability,
+                                scalability, and seamless state management.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Card 6: Motion & Interactive Focus (Span 4) -->
+                    <div
+                        class="md:col-span-4 p-6 rounded-3xl bg-navy-900/80 border border-slate-800/80 backdrop-blur-xl shadow-xl flex flex-col justify-between hover:border-cyan-light/40 transition-colors">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-cyan-light/10 border border-cyan-light/30 flex items-center justify-center text-cyan-light mb-4">
+                            <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-bold font-heading text-white mb-2">Delightful Motion</h4>
+                            <p class="text-slate-400 text-sm leading-relaxed">
+                                Integrating fluid GSAP animations, scroll-triggered movements, and subtle
+                                micro-interactions that engage users without reducing performance.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Orbit Positioning & Interaction Script -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const nodes = document.querySelectorAll('.orbit-node');
+                if (!nodes.length) return;
+
+                const radius = window.innerWidth < 640 ? 95 : 140;
+                const total = nodes.length;
+                let angleOffset = 0;
+
+                function positionNodes() {
+                    nodes.forEach((node, index) => {
+                        const angle = (index * (2 * Math.PI / total)) + angleOffset;
+                        const x = Math.cos(angle) * radius;
+                        const y = Math.sin(angle) * radius;
+                        node.style.transform = `translate(${x}px, ${y}px)`;
+                    });
+                }
+
+                function animateOrbit() {
+                    angleOffset += 0.003;
+                    positionNodes();
+                    requestAnimationFrame(animateOrbit);
+                }
+
+                animateOrbit();
+
+                window.updateOrbitDetail = function (title, category, desc) {
+                    const titleEl = document.getElementById('orbit-title');
+                    const categoryEl = document.getElementById('orbit-category');
+                    const descEl = document.getElementById('orbit-desc');
+
+                    if (titleEl) titleEl.textContent = title;
+                    if (categoryEl) categoryEl.textContent = category;
+                    if (descEl) descEl.textContent = desc;
+                };
+            });
+        </script>
+
+        <!-- Styles for custom keyframe animations -->
+        <style>
+            @keyframes float-slow {
+
+                0%,
+                100% {
+                    transform: translateY(0px);
+                }
+
+                50% {
+                    transform: translateY(-6px);
+                }
+            }
+
+            .animate-float-slow {
+                animation: float-slow 4s ease-in-out infinite;
+            }
+        </style>
+
+        <!-- Skills Section -->
+        <section id="skills" class="py-16 sm:py-24 px-4 sm:px-6 max-w-7xl mx-auto select-none relative overflow-hidden">
+
+            <!-- Section Heading -->
+            <div class="flex items-center gap-4 mb-12 transition-all duration-700 ease-out">
+                <span class="font-code text-cyan-light text-sm font-semibold tracking-wider">02.</span>
+                <h2 class="font-heading font-extrabold text-2xl sm:text-4xl text-white tracking-tight">
+                    Skills & <span
+                        class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-light via-cyan-glow to-blue-400">Expertise</span>
+                </h2>
+                <div class="h-px bg-gradient-to-r from-slate-800 via-cyan-light/20 to-transparent flex-1 max-w-md ml-4">
+                </div>
+            </div>
+
+            <!-- Main Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+
+                <!-- Frontend Core -->
+                <div
+                    class="glass-card p-6 sm:p-7 rounded-3xl space-y-6 relative group transform transition-all duration-500 ease-out hover:-translate-y-2 border border-slate-800 hover:border-cyan-light/40 hover:shadow-[0_15px_30px_-10px_rgba(0,240,255,0.25)]">
+                    <div class="flex items-center gap-3.5 border-b border-slate-800/80 pb-4">
+                        <div
+                            class="w-12 h-12 rounded-full bg-cyan-light/10 border border-cyan-light/30 flex items-center justify-center text-cyan-light text-xl shrink-0 transition-all duration-500 ease-out group-hover:scale-110 group-hover:rotate-6 group-hover:shadow-[0_0_20px_rgba(0,240,255,0.4)]">
+                            <i class="fa-solid fa-layer-group transition-transform duration-300"></i>
+                        </div>
+                        <h3
+                            class="font-heading font-bold text-lg text-white transition-colors duration-300 group-hover:text-cyan-light">
+                            Frontend Core</h3>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2.5 pt-1">
+                        <span
+                            class="px-4 py-2 rounded-full bg-navy-900/90 border border-slate-700/80 text-slate-200 text-xs font-code transform transition-all duration-300 ease-out hover:scale-105 hover:border-cyan-light hover:text-cyan-light hover:bg-navy-950 hover:shadow-[0_0_15px_rgba(0,240,255,0.35)] cursor-default">React.js</span>
+                        <span
+                            class="px-4 py-2 rounded-full bg-navy-900/90 border border-slate-700/80 text-slate-200 text-xs font-code transform transition-all duration-300 ease-out hover:scale-105 hover:border-cyan-light hover:text-cyan-light hover:bg-navy-950 hover:shadow-[0_0_15px_rgba(0,240,255,0.35)] cursor-default">JavaScript</span>
+                        <span
+                            class="px-4 py-2 rounded-full bg-navy-900/90 border border-slate-700/80 text-slate-200 text-xs font-code transform transition-all duration-300 ease-out hover:scale-105 hover:border-cyan-light hover:text-cyan-light hover:bg-navy-950 hover:shadow-[0_0_15px_rgba(0,240,255,0.35)] cursor-default">Tailwind
+                            CSS</span>
+                        <span
+                            class="px-4 py-2 rounded-full bg-navy-900/90 border border-slate-700/80 text-slate-200 text-xs font-code transform transition-all duration-300 ease-out hover:scale-105 hover:border-cyan-light hover:text-cyan-light hover:bg-navy-950 hover:shadow-[0_0_15px_rgba(0,240,255,0.35)] cursor-default">TypeScript</span>
+                        <span
+                            class="px-4 py-2 rounded-full bg-navy-900/90 border border-slate-700/80 text-slate-200 text-xs font-code transform transition-all duration-300 ease-out hover:scale-105 hover:border-cyan-light hover:text-cyan-light hover:bg-navy-950 hover:shadow-[0_0_15px_rgba(0,240,255,0.35)] cursor-default">HTML5
+                            / CSS3</span>
+                        <span
+                            class="px-4 py-2 rounded-full bg-navy-900/90 border border-slate-700/80 text-slate-200 text-xs font-code transform transition-all duration-300 ease-out hover:scale-105 hover:border-cyan-light hover:text-cyan-light hover:bg-navy-950 hover:shadow-[0_0_15px_rgba(0,240,255,0.35)] cursor-default">React
+                            Router</span>
+                    </div>
+                </div>
+
+                <!-- Animation & Styling -->
+                <div
+                    class="glass-card p-6 sm:p-7 rounded-3xl space-y-6 relative group transform transition-all duration-500 ease-out hover:-translate-y-2 border border-slate-800 hover:border-cyan-light/40 hover:shadow-[0_15px_30px_-10px_rgba(0,240,255,0.25)]">
+                    <div class="flex items-center gap-3.5 border-b border-slate-800/80 pb-4">
+                        <div
+                            class="w-12 h-12 rounded-full bg-cyan-light/10 border border-cyan-light/30 flex items-center justify-center text-cyan-glow text-xl shrink-0 transition-all duration-500 ease-out group-hover:scale-110 group-hover:rotate-12 group-hover:shadow-[0_0_20px_rgba(0,240,255,0.4)]">
+                            <i class="fa-solid fa-wand-magic-sparkles transition-transform duration-300"></i>
+                        </div>
+                        <h3
+                            class="font-heading font-bold text-lg text-white transition-colors duration-300 group-hover:text-cyan-light">
+                            Animation & Styling</h3>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2.5 pt-1">
+                        <span
+                            class="px-4 py-2 rounded-full bg-navy-900/90 border border-slate-700/80 text-slate-200 text-xs font-code transform transition-all duration-300 ease-out hover:scale-105 hover:border-cyan-light hover:text-cyan-light hover:bg-navy-950 hover:shadow-[0_0_15px_rgba(0,240,255,0.35)] cursor-default">GSAP</span>
+                        <span
+                            class="px-4 py-2 rounded-full bg-navy-900/90 border border-slate-700/80 text-slate-200 text-xs font-code transform transition-all duration-300 ease-out hover:scale-105 hover:border-cyan-light hover:text-cyan-light hover:bg-navy-950 hover:shadow-[0_0_15px_rgba(0,240,255,0.35)] cursor-default">ScrollTrigger</span>
+                        <span
+                            class="px-4 py-2 rounded-full bg-navy-900/90 border border-slate-700/80 text-slate-200 text-xs font-code transform transition-all duration-300 ease-out hover:scale-105 hover:border-cyan-light hover:text-cyan-light hover:bg-navy-950 hover:shadow-[0_0_15px_rgba(0,240,255,0.35)] cursor-default">Responsive
+                            Design</span>
+                        <span
+                            class="px-4 py-2 rounded-full bg-navy-900/90 border border-slate-700/80 text-slate-200 text-xs font-code transform transition-all duration-300 ease-out hover:scale-105 hover:border-cyan-light hover:text-cyan-light hover:bg-navy-950 hover:shadow-[0_0_15px_rgba(0,240,255,0.35)] cursor-default">UI
+                            Development</span>
+                    </div>
+                </div>
+
+                <!-- Tools & Environment -->
+                <div
+                    class="glass-card p-6 sm:p-7 rounded-3xl space-y-6 relative group transform transition-all duration-500 ease-out hover:-translate-y-2 border border-slate-800 hover:border-cyan-light/40 hover:shadow-[0_15px_30px_-10px_rgba(0,240,255,0.25)]">
+                    <div class="flex items-center gap-3.5 border-b border-slate-800/80 pb-4">
+                        <div
+                            class="w-12 h-12 rounded-full bg-cyan-light/10 border border-cyan-light/30 flex items-center justify-center text-blue-400 text-xl shrink-0 transition-all duration-500 ease-out group-hover:scale-110 group-hover:-rotate-12 group-hover:shadow-[0_0_20px_rgba(0,240,255,0.4)]">
+                            <i class="fa-solid fa-screwdriver-wrench transition-transform duration-300"></i>
+                        </div>
+                        <h3
+                            class="font-heading font-bold text-lg text-white transition-colors duration-300 group-hover:text-cyan-light">
+                            Tools & Environment</h3>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2.5 pt-1">
+                        <span
+                            class="px-4 py-2 rounded-full bg-navy-900/90 border border-slate-700/80 text-slate-200 text-xs font-code transform transition-all duration-300 ease-out hover:scale-105 hover:border-cyan-light hover:text-cyan-light hover:bg-navy-950 hover:shadow-[0_0_15px_rgba(0,240,255,0.35)] cursor-default">Git
+                            & GitHub</span>
+                        <span
+                            class="px-4 py-2 rounded-full bg-navy-900/90 border border-slate-700/80 text-slate-200 text-xs font-code transform transition-all duration-300 ease-out hover:scale-105 hover:border-cyan-light hover:text-cyan-light hover:bg-navy-950 hover:shadow-[0_0_15px_rgba(0,240,255,0.35)] cursor-default">Vite</span>
+                        <span
+                            class="px-4 py-2 rounded-full bg-navy-900/90 border border-slate-700/80 text-slate-200 text-xs font-code transform transition-all duration-300 ease-out hover:scale-105 hover:border-cyan-light hover:text-cyan-light hover:bg-navy-950 hover:shadow-[0_0_15px_rgba(0,240,255,0.35)] cursor-default">VS
+                            Code</span>
+                        <span
+                            class="px-4 py-2 rounded-full bg-navy-900/90 border border-slate-700/80 text-slate-200 text-xs font-code transform transition-all duration-300 ease-out hover:scale-105 hover:border-cyan-light hover:text-cyan-light hover:bg-navy-950 hover:shadow-[0_0_15px_rgba(0,240,255,0.35)] cursor-default">Local
+                            Storage</span>
+                    </div>
+                </div>
+
+                <!-- Currently Learning Full-Stack Banner -->
+                <div
+                    class="glass-card p-6 sm:p-8 rounded-3xl md:col-span-2 lg:col-span-3 border border-emerald-500/30 bg-gradient-to-r from-navy-900/80 via-navy-950 to-navy-900/80 transform transition-all duration-500 ease-out hover:border-emerald-400/60 hover:shadow-[0_15px_35px_-10px_rgba(16,185,129,0.2)] group">
+
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+                        <div class="flex items-center gap-3">
+                            <span
+                                class="px-4 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 text-xs font-code font-bold uppercase tracking-wider flex items-center gap-2 shadow-[0_0_15px_rgba(16,185,129,0.2)] transition-all duration-300 hover:shadow-[0_0_20px_rgba(16,185,129,0.4)]">
+                                <span class="relative flex h-2.5 w-2.5">
+                                    <span
+                                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400"></span>
+                                </span>
+                                <i class="fa-solid fa-seedling text-sm animate-float-slow"></i> Currently Learning
+                            </span>
+                            <span
+                                class="text-slate-400 text-xs font-code hidden sm:inline-block transition-colors duration-300 group-hover:text-slate-300">—
+                                Expanding into Backend Development</span>
+                        </div>
+                        <span class="text-slate-400 text-xs font-code sm:hidden">— Expanding into Backend
+                            Development</span>
+                    </div>
+
+                    <div class="flex flex-wrap gap-3">
+                        <span
+                            class="px-5 py-2.5 rounded-full bg-navy-950/90 border border-emerald-500/30 text-emerald-300 font-code text-xs flex items-center gap-2.5 shadow-md transform transition-all duration-300 ease-out hover:scale-105 hover:border-emerald-400 hover:bg-navy-900 hover:shadow-[0_0_20px_rgba(16,185,129,0.35)] cursor-default">
+                            <i
+                                class="fa-brands fa-node-js text-base text-emerald-400 transition-transform duration-300 hover:rotate-12"></i>
+                            Node.js
+                        </span>
+                        <span
+                            class="px-5 py-2.5 rounded-full bg-navy-950/90 border border-emerald-500/30 text-emerald-300 font-code text-xs flex items-center gap-2.5 shadow-md transform transition-all duration-300 ease-out hover:scale-105 hover:border-emerald-400 hover:bg-navy-900 hover:shadow-[0_0_20px_rgba(16,185,129,0.35)] cursor-default">
+                            <i
+                                class="fa-solid fa-server text-base text-emerald-400 transition-transform duration-300 hover:scale-125"></i>
+                            Express.js
+                        </span>
+                        <span
+                            class="px-5 py-2.5 rounded-full bg-navy-950/90 border border-emerald-500/30 text-emerald-300 font-code text-xs flex items-center gap-2.5 shadow-md transform transition-all duration-300 ease-out hover:scale-105 hover:border-emerald-400 hover:bg-navy-900 hover:shadow-[0_0_20px_rgba(16,185,129,0.35)] cursor-default">
+                            <i
+                                class="fa-solid fa-database text-base text-emerald-400 transition-transform duration-300 hover:scale-125"></i>
+                            SQL / PostgreSQL / MySQL
+                        </span>
+                        <span
+                            class="px-5 py-2.5 rounded-full bg-navy-950/90 border border-emerald-500/30 text-emerald-300 font-code text-xs flex items-center gap-2.5 shadow-md transform transition-all duration-300 ease-out hover:scale-105 hover:border-emerald-400 hover:bg-navy-900 hover:shadow-[0_0_20px_rgba(16,185,129,0.35)] cursor-default">
+                            <i
+                                class="fa-solid fa-network-wired text-base text-emerald-400 transition-transform duration-300 hover:scale-125"></i>
+                            REST APIs & CRUD Operations
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Projects Section Container -->
+        <section id="projects" class="py-16 sm:py-24 px-4 sm:px-6 max-w-7xl mx-auto relative overflow-hidden">
+            <!-- Background Ambient Glow -->
+            <div
+                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-cyan-light/5 rounded-full blur-3xl pointer-events-none">
+            </div>
+
+            <!-- Section Header -->
+            <div class="text-center max-w-2xl mx-auto mb-16 relative z-10">
+                <span
+                    class="px-3 py-1 rounded-full bg-cyan-light/10 border border-cyan-light/30 text-cyan-light text-xs font-code uppercase tracking-widest mb-4 inline-block">
+                    Portfolio Showcase
+                </span>
+                <h2 class="font-heading text-3xl sm:text-5xl font-bold text-white mb-4">
+                    Featured <span class="text-cyan-light">Projects</span>
+                </h2>
+                <p class="text-slate-400 text-sm sm:text-base leading-relaxed">
+                    Select any project node on the interactive wheel or use the side controls to inspect architecture
+                    and live deployments.
+                </p>
+            </div>
+
+            <!-- Main Interactive Grid (Two-Column Layout) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
+
+                <!-- LEFT COLUMN: Desktop Interactive Wheel (Fully Responsive Scale down) -->
+                <div
+                    class="flex lg:col-span-7 justify-center items-center relative min-h-[380px] sm:min-h-[500px] w-full overflow-hidden">
+                    <div
+                        class="relative w-[320px] h-[320px] sm:w-[480px] sm:h-[480px] flex items-center justify-center select-none scale-[0.85] sm:scale-100">
+
+                        <!-- Orbit Track Lines -->
+                        <div class="absolute inset-0 rounded-full border border-slate-800/80"></div>
+                        <div
+                            class="absolute inset-8 rounded-full border border-cyan-light/20 shadow-[0_0_50px_rgba(0,240,255,0.08)]">
+                        </div>
+
+                        <!-- Laser Beam SVG Canvas -->
+                        <svg class="absolute inset-0 w-full h-full pointer-events-none z-10">
+                            <line id="laser-beam" x1="240" y1="240" x2="240" y2="240" stroke="#00f0ff" stroke-width="2"
+                                stroke-dasharray="6,4" class="opacity-0 transition-opacity duration-300" />
+                        </svg>
+
+                        <!-- Rotating Orbit Container -->
+                        <div id="project-wheel"
+                            class="absolute w-full h-full rounded-full transition-transform duration-1000 ease-out">
+                            <!-- Nodes injected via JS -->
+                        </div>
+
+                        <!-- Center Decorative Core -->
+                        <div
+                            class="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-navy-950 border border-slate-800 shadow-[0_0_30px_rgba(0,240,255,0.15)] flex flex-col items-center justify-center text-center p-2 z-20">
+                            <div id="center-icon"
+                                class="text-2xl sm:text-3xl text-cyan-light drop-shadow-[0_0_12px_rgba(0,240,255,0.8)]">
+                                <i class="fa-solid fa-file-invoice"></i>
+                            </div>
+                            <span
+                                class="text-[10px] font-code text-slate-400 mt-1 uppercase tracking-wider">Selected</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN: Detailed Project Info Panel & Navigation Controls -->
+                <div class="lg:col-span-5 flex flex-col justify-between h-full">
+
+                    <!-- Dynamic Info Card -->
+                    <div id="project-details-card"
+                        class="glass-card rounded-3xl p-6 sm:p-8 bg-navy-900/80 border border-slate-800 backdrop-blur-2xl shadow-2xl relative overflow-hidden transition-all duration-300">
+                        <div
+                            class="absolute top-0 right-0 w-32 h-32 bg-cyan-light/10 rounded-bl-full pointer-events-none">
+                        </div>
+
+                        <div class="flex items-center justify-between mb-6">
+                            <span id="card-category"
+                                class="px-3 py-1 rounded-lg bg-cyan-light/10 border border-cyan-light/30 text-cyan-light font-code text-xs font-semibold">
+                                Web Application
+                            </span>
+                            <div class="flex gap-2">
+                                <a id="card-github" href="#" target="_blank" rel="noopener noreferrer"
+                                    class="w-10 h-10 rounded-xl bg-navy-800/80 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-cyan-light hover:border-cyan-light/50 transition-all shadow-md"
+                                    title="View Source Code">
+                                    <i class="fa-brands fa-github text-lg"></i>
+                                </a>
+                                <a id="card-demo" href="#" target="_blank" rel="noopener noreferrer"
+                                    class="w-10 h-10 rounded-xl bg-navy-800/80 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-cyan-light hover:border-cyan-light/50 transition-all shadow-md"
+                                    title="Live Preview">
+                                    <i class="fa-solid fa-arrow-up-right-from-square text-sm"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <h3 id="card-title" class="font-heading font-bold text-2xl sm:text-3xl text-white mb-3">
+                            BuildCV
+                        </h3>
+
+                        <p id="card-desc"
+                            class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-8 min-h-[60px] sm:min-h-[72px]">
+                            A modern React resume builder that lets users create professional CVs with live preview,
+                            dynamic form fields, and direct PDF exports.
+                        </p>
+
+                        <!-- Tags Container -->
+                        <div class="border-t border-slate-800/80 pt-6">
+                            <h4 class="text-xs font-code uppercase text-slate-400 mb-3 tracking-wider">Technologies Used
+                            </h4>
+                            <div id="card-tags" class="flex flex-wrap gap-2">
+                                <!-- Tags injected via JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Side Navigation Controls -->
+                    <div class="flex items-center justify-between mt-8 px-2">
+                        <div class="flex items-center gap-3">
+                            <button id="prev-project-btn"
+                                class="w-12 h-12 rounded-2xl bg-navy-900 border border-slate-800 text-slate-300 hover:border-cyan-light hover:text-cyan-light hover:shadow-[0_0_20px_rgba(0,240,255,0.2)] transition-all flex items-center justify-center active:scale-95">
+                                <i class="fa-solid fa-arrow-left"></i>
+                            </button>
+                            <button id="next-project-btn"
+                                class="w-12 h-12 rounded-2xl bg-navy-900 border border-slate-800 text-slate-300 hover:border-cyan-light hover:text-cyan-light hover:shadow-[0_0_20px_rgba(0,240,255,0.2)] transition-all flex items-center justify-center active:scale-95">
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+                        </div>
+                        <div class="text-right">
+                            <span id="project-counter" class="font-code text-lg font-bold text-cyan-light">01</span>
+                            <span class="font-code text-sm text-slate-400"> / 04</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- SECONDARY PROJECTS GRID LIST (Ensuring absolutely zero content is hidden on smaller mobile widths) -->
+            <div class="mt-16 pt-12 border-t border-slate-800/80">
+                <div class="text-center mb-8">
+                    <span class="text-xs font-code text-cyan-light uppercase tracking-widest">// Complete Project
+                        Archive</span>
+                    <h3 class="font-heading text-xl sm:text-2xl font-bold text-white mt-1">All Projects Overview</h3>
+                </div>
+                <div id="all-projects-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Injected via JS to display all projects concurrently if desired on mobile -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Logic Script -->
+        <script>
+            const projectsData = [
+                {
+                    title: "BuildCV",
+                    category: "React App",
+                    desc: "A modern React resume builder that lets users create professional CVs with live preview, template choices, dynamic form fields, and direct PDF exports.",
+                    icon: "fa-file-invoice",
+                    github: "https://github.com/Arvaa11/BuildCV-App.git",
+                    demo: "https://build-cv-app-phi.vercel.app",
+                    tags: ["React.js", "Tailwind CSS", "GSAP", "jsPDF"]
+                },
+                {
+                    title: "Freelancer Workspace",
+                    category: "Dashboard App",
+                    desc: "A freelancer workspace dashboard application designed to organize client projects, daily tasks, deadlines, and practical workflow components in one clean interface.",
+                    icon: "fa-chart-line",
+                    github: "https://github.com/Arvaa11/Freelancer-Workspace.git",
+                    demo: "https://freelancer-workspace-six.vercel.app",
+                    tags: ["React.js", "JavaScript", "Tailwind CSS", "Vite"]
+                },
+                {
+                    title: "WordVault",
+                    category: "Mini Utility",
+                    desc: "A mini vocabulary application built with React.js and browser Local Storage to allow users to look up words, add custom definitions, and save vocabulary across sessions.",
+                    icon: "fa-book-bookmark",
+                    github: "https://github.com/Arvaa11/WordVault-App.git",
+                    demo: "https://word-vault-app.vercel.app",
+                    tags: ["React.js", "JavaScript", "Local Storage"]
+                },
+                {
+                    title: "LuxEstate",
+                    category: "Landing Page",
+                    desc: "A luxury real-estate website featuring an interactive property gallery, lightbox modal, animated floor-plans, map integrations, and smooth GSAP scroll animations.",
+                    icon: "fa-city",
+                    github: "https://github.com/Arvaa11/LuxEstate.git",
+                    demo: "https://lux-estate-eosin.vercel.app",
+                    tags: ["HTML / CSS", "JavaScript", "GSAP"]
+                }
+            ];
+
+            const wheel = document.getElementById('project-wheel');
+            const cardTitle = document.getElementById('card-title');
+            const cardCategory = document.getElementById('card-category');
+            const cardDesc = document.getElementById('card-desc');
+            const cardTags = document.getElementById('card-tags');
+            const centerIcon = document.getElementById('center-icon');
+            const cardGithub = document.getElementById('card-github');
+            const cardDemo = document.getElementById('card-demo');
+            const projectCounter = document.getElementById('project-counter');
+            const laserBeam = document.getElementById('laser-beam');
+            const prevBtn = document.getElementById('prev-project-btn');
+            const nextBtn = document.getElementById('next-project-btn');
+            const allProjectsGrid = document.getElementById('all-projects-grid');
+
+            let currentRotation = 0;
+            let isPaused = false;
+            let selectedIndex = 0;
+            const totalProjects = projectsData.length;
+            const radius = window.innerWidth < 640 ? 110 : 175; // Responsive orbit radius
+
+            // Build Desktop Wheel Nodes
+            projectsData.forEach((project, index) => {
+                const angle = (360 / totalProjects) * index;
+                const node = document.createElement('div');
+
+                node.className = `project-node absolute flex flex-col items-center justify-center cursor-pointer transition-all duration-300 z-20`;
+                node.style.top = '50%';
+                node.style.left = '50%';
+
+                node.innerHTML = `
+            <div class="node-badge w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-navy-900 border-2 border-cyan-light/60 text-cyan-light flex items-center justify-center text-lg sm:text-xl shadow-[0_0_15px_rgba(0,240,255,0.2)] hover:scale-125 transition-all duration-300">
+                <i class="fa-solid ${project.icon}"></i>
+            </div>
+            <span class="node-label mt-2 px-2.5 sm:px-3 py-1 rounded-lg bg-navy-950/90 border border-slate-700 text-white font-bold text-[10px] sm:text-xs whitespace-nowrap shadow-lg">
+                ${project.title}
+            </span>
+        `;
+
+                node.addEventListener('click', () => selectProject(index));
+                wheel.appendChild(node);
+            });
+
+            // Populate Secondary Full Archive Grid
+            if (allProjectsGrid) {
+                projectsData.forEach((project) => {
+                    const card = document.createElement('div');
+                    card.className = "glass-card rounded-2xl p-6 bg-navy-900/80 border border-slate-800 relative overflow-hidden flex flex-col justify-between";
+                    card.innerHTML = `
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 rounded-xl bg-cyan-light/10 border border-cyan-light/30 flex items-center justify-center text-cyan-light text-xl">
+                                    <i class="fa-solid ${project.icon}"></i>
+                                </div>
+                                <div class="flex gap-2">
+                                    <a href="${project.github}" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-lg bg-navy-800 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-cyan-light">
+                                        <i class="fa-brands fa-github text-base"></i>
+                                    </a>
+                                    <a href="${project.demo}" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-lg bg-navy-800 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-cyan-light">
+                                        <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <h3 class="font-heading font-bold text-xl text-white mb-2">${project.title}</h3>
+                            <p class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-4">${project.desc}</p>
+                        </div>
+                        <div class="flex flex-wrap gap-2 pt-4 border-t border-slate-800">
+                            ${project.tags.map(tag => `<span class="px-2.5 py-0.5 rounded-md bg-navy-950 border border-slate-800 text-cyan-light text-[11px] font-code">${tag}</span>`).join('')}
+                        </div>
+                    `;
+                    allProjectsGrid.appendChild(card);
+                });
+            }
+
+            // Update Side Panel Content and Connecting Beam
+            function selectProject(index) {
+                selectedIndex = index;
+                const project = projectsData[index];
+
+                cardTitle.textContent = project.title;
+                cardCategory.textContent = project.category;
+                cardDesc.textContent = project.desc;
+                centerIcon.innerHTML = `<i class="fa-solid ${project.icon}"></i>`;
+                cardGithub.href = project.github;
+                cardDemo.href = project.demo;
+                projectCounter.textContent = `0${index + 1}`;
+
+                // Render Tags
+                cardTags.innerHTML = project.tags
+                    .map(tag => `<span class="px-3 py-1 rounded-lg bg-navy-950 border border-slate-800 text-cyan-light font-code text-xs font-medium">${tag}</span>`)
+                    .join('');
+
+                // Highlight Active Node
+                document.querySelectorAll('.project-node').forEach((node, idx) => {
+                    const badge = node.querySelector('.node-badge');
+                    if (idx === index) {
+                        badge.classList.add('bg-cyan-light', 'text-navy-950', 'scale-125', 'shadow-[0_0_25px_rgba(0,240,255,0.6)]');
+                        badge.classList.remove('bg-navy-900', 'text-cyan-light');
+                    } else {
+                        badge.classList.remove('bg-cyan-light', 'text-navy-950', 'scale-125', 'shadow-[0_0_25px_rgba(0,240,255,0.6)]');
+                        badge.classList.add('bg-navy-900', 'text-cyan-light');
+                    }
+                });
+
+                updateLaserBeam();
+            }
+
+            // Calculate Laser Beam Vector
+            function updateLaserBeam() {
+                const nodes = document.querySelectorAll('.project-node');
+                if (!nodes[selectedIndex]) return;
+
+                const angleDeg = (360 / totalProjects) * selectedIndex + currentRotation;
+                const angleRad = (angleDeg - 90) * (Math.PI / 180);
+
+                const centerX = 240;
+                const centerY = 240;
+                const targetX = centerX + radius * Math.cos(angleRad);
+                const targetY = centerY + radius * Math.sin(angleRad);
+
+                laserBeam.setAttribute('x1', centerX);
+                laserBeam.setAttribute('y1', centerY);
+                laserBeam.setAttribute('x2', targetX);
+                laserBeam.setAttribute('y2', targetY);
+                laserBeam.classList.remove('opacity-0');
+            }
+
+            // Smooth Orbit Loop
+            function rotateWheel() {
+                if (!isPaused) {
+                    currentRotation += 0.15;
+                    wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+                    const nodes = document.querySelectorAll('.project-node');
+                    nodes.forEach((node, idx) => {
+                        const angle = (360 / totalProjects) * idx;
+                        node.style.transform = `translate(-50%, -50%) rotate(${angle}deg) translateY(-${radius}px) rotate(-${angle + currentRotation}deg)`;
+                    });
+
+                    updateLaserBeam();
+                }
+                requestAnimationFrame(rotateWheel);
+            }
+
+            // Button Controls
+            prevBtn.addEventListener('click', () => {
+                const prevIndex = (selectedIndex - 1 + totalProjects) % totalProjects;
+                selectProject(prevIndex);
+            });
+
+            nextBtn.addEventListener('click', () => {
+                const nextIndex = (selectedIndex + 1) % totalProjects;
+                selectProject(nextIndex);
+            });
+
+            // Pause on Hover
+            wheel.parentElement.addEventListener('mouseenter', () => isPaused = true);
+            wheel.parentElement.addEventListener('mouseleave', () => isPaused = false);
+
+            // Initial Execution
+            selectProject(0);
+            rotateWheel();
+        </script>
+
+        <!-- Timeline & Education Section -->
+        <section id="experience" class="py-16 sm:py-24 px-4 sm:px-6 max-w-5xl mx-auto relative">
+
+            <!-- Ambient Blur Background -->
+            <div
+                class="absolute top-1/3 left-0 w-72 h-72 bg-cyan-light/5 rounded-full blur-[120px] pointer-events-none">
+            </div>
+
+            <!-- Section Title -->
+            <div class="flex items-center gap-4 mb-16">
+                <span class="font-code text-cyan-light text-sm font-semibold">04.</span>
+                <h2 class="font-heading font-bold text-2xl sm:text-4xl text-white tracking-tight">Timeline & Experience
+                </h2>
+                <div class="h-px bg-slate-800 flex-1 max-w-md ml-4"></div>
+            </div>
+
+            <!-- Timeline Wrapper -->
+            <div class="relative border-l-2 border-slate-800 ml-4 md:ml-36 space-y-12">
+
+                <!-- Item 1: Frontend Developer -->
+                <div class="relative pl-6 sm:pl-8 md:pl-10 group">
+
+                    <!-- Date Label (Visible on desktop to the left of line, mobile inline) -->
+                    <div
+                        class="hidden md:block absolute -left-36 top-1.5 w-28 text-right font-code text-xs text-cyan-light font-medium">
+                        2023 – Present
+                    </div>
+
+                    <!-- Glowing Node Bullet -->
+                    <div
+                        class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-navy-950 border-2 border-cyan-light group-hover:bg-cyan-glow group-hover:scale-125 group-hover:shadow-[0_0_15px_rgba(0,240,255,0.6)] transition-all duration-300">
+                    </div>
+
+                    <!-- Content Card -->
+                    <div
+                        class="p-6 sm:p-8 rounded-2xl bg-navy-900/80 border border-slate-800/80 backdrop-blur-xl shadow-xl hover:border-cyan-light/40 transition-all duration-300">
+
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                            <div>
+                                <h3
+                                    class="font-heading font-bold text-lg sm:text-xl text-white group-hover:text-cyan-light transition-colors">
+                                    Frontend Developer
+                                </h3>
+                                <p class="text-slate-400 font-code text-xs mt-1">Independent Projects & Open Source</p>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <!-- Mobile-only Date Pill -->
+                                <span
+                                    class="md:hidden font-code text-[11px] text-cyan-light bg-navy-950 px-2.5 py-1 rounded-full border border-slate-800">
+                                    2023 – Present
+                                </span>
+                                <span
+                                    class="font-code text-xs text-cyan-light bg-cyan-light/10 px-3 py-1 rounded-full border border-cyan-light/20 w-fit">
+                                    Active
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Accomplishments List -->
+                        <ul class="mt-4 space-y-2.5 text-slate-300 text-xs sm:text-sm">
+                            <li class="flex items-start gap-2.5">
+                                <svg class="w-4 h-4 text-cyan-light shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span>Architecting and deploying responsive web applications using
+                                    <strong>React.js</strong>, <strong>Tailwind CSS</strong>, and modern <strong>ES6+
+                                        JavaScript</strong>.</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <svg class="w-4 h-4 text-cyan-light shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span>Integrating <strong>GSAP</strong> and <strong>ScrollTrigger</strong> animations
+                                    for fluid UI micro-interactions and immersive landing page scenes.</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <svg class="w-4 h-4 text-cyan-light shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span>Maintaining clean git histories, modular component architectures, and optimized
+                                    Vite build pipelines.</span>
+                            </li>
+                        </ul>
+
+                        <!-- Skill Badges -->
+                        <div class="mt-6 pt-4 border-t border-slate-800/80 flex flex-wrap gap-2">
+                            <span
+                                class="px-2.5 py-1 rounded-md bg-navy-950 border border-slate-800 font-code text-[11px] text-slate-300">React.js</span>
+                            <span
+                                class="px-2.5 py-1 rounded-md bg-navy-950 border border-slate-800 font-code text-[11px] text-slate-300">Tailwind
+                                CSS</span>
+                            <span
+                                class="px-2.5 py-1 rounded-md bg-navy-950 border border-slate-800 font-code text-[11px] text-slate-300">GSAP</span>
+                            <span
+                                class="px-2.5 py-1 rounded-md bg-navy-950 border border-slate-800 font-code text-[11px] text-slate-300">Vite</span>
+                            <span
+                                class="px-2.5 py-1 rounded-md bg-navy-950 border border-slate-800 font-code text-[11px] text-slate-300">Git
+                                / GitHub</span>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Item 2: BS Computer Science -->
+                <div class="relative pl-6 sm:pl-8 md:pl-10 group">
+
+                    <!-- Date Label -->
+                    <div
+                        class="hidden md:block absolute -left-36 top-1.5 w-28 text-right font-code text-xs text-slate-400 font-medium">
+                        In Progress
+                    </div>
+
+                    <!-- Glowing Node Bullet -->
+                    <div
+                        class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-navy-950 border-2 border-slate-600 group-hover:border-cyan-light group-hover:bg-cyan-glow group-hover:scale-125 group-hover:shadow-[0_0_15px_rgba(0,240,255,0.6)] transition-all duration-300">
+                    </div>
+
+                    <!-- Content Card -->
+                    <div
+                        class="p-6 sm:p-8 rounded-2xl bg-navy-900/80 border border-slate-800/80 backdrop-blur-xl shadow-xl hover:border-cyan-light/40 transition-all duration-300">
+
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                            <div>
+                                <h3
+                                    class="font-heading font-bold text-lg sm:text-xl text-white group-hover:text-cyan-light transition-colors">
+                                    BS Computer Science (BSCS)
+                                </h3>
+                                <p class="text-slate-400 font-code text-xs mt-1">Undergraduate Degree</p>
+                            </div>
+
+                            <!-- Mobile-only Date Pill -->
+                            <span
+                                class="md:hidden font-code text-[11px] text-slate-400 bg-navy-950 px-2.5 py-1 rounded-full border border-slate-800 w-fit">
+                                Undergraduate
+                            </span>
+                        </div>
+
+                        <p class="text-slate-300 text-xs sm:text-sm leading-relaxed mt-3">
+                            Mastering core computer science principles including Object-Oriented Programming (OOP), Data
+                            Structures & Algorithms (DSA), Database Systems, and Software Engineering methodologies.
+                        </p>
+
+                        <!-- Focus Areas -->
+                        <div class="mt-4 pt-4 border-t border-slate-800/80 flex flex-wrap gap-2">
+                            <span
+                                class="px-2.5 py-1 rounded-md bg-navy-950 border border-slate-800 font-code text-[11px] text-slate-400">Data
+                                Structures</span>
+                            <span
+                                class="px-2.5 py-1 rounded-md bg-navy-950 border border-slate-800 font-code text-[11px] text-slate-400">OOP</span>
+                            <span
+                                class="px-2.5 py-1 rounded-md bg-navy-950 border border-slate-800 font-code text-[11px] text-slate-400">Web
+                                Architecture</span>
+                            <span
+                                class="px-2.5 py-1 rounded-md bg-navy-950 border border-slate-800 font-code text-[11px] text-slate-400">Database
+                                Systems</span>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="py-16 sm:py-24 px-4 sm:px-6 max-w-6xl mx-auto relative">
+
+            <!-- Ambient Glow Background Blur -->
+            <div
+                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyan-light/10 rounded-full blur-[150px] pointer-events-none">
+            </div>
+
+            <!-- Section Header -->
+            <div class="flex flex-col items-center text-center mb-16">
+                <div
+                    class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-navy-900 border border-cyan-light/30 text-cyan-light font-code text-xs mb-3 shadow-[0_0_15px_rgba(0,240,255,0.1)]">
+                    <span class="font-bold">05.</span>
+                    <span>What's Next?</span>
+                </div>
+                <h2 class="font-heading font-extrabold text-3xl sm:text-5xl text-white tracking-tight">
+                    Let's Build Something <span
+                        class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-light to-cyan-electric">Together</span>
+                </h2>
+                <p class="text-slate-400 text-sm sm:text-base max-w-lg mt-3 font-sans px-2">
+                    Whether you have an upcoming project, job inquiry, or just want to connect—my inbox is always open.
+                </p>
+            </div>
+
+            <!-- Main Card Container -->
+            <div
+                class="p-6 sm:p-12 rounded-3xl bg-navy-900/80 border border-slate-800/90 backdrop-blur-2xl shadow-2xl relative overflow-hidden">
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+
+                    <!-- Left Info Panel (Span 5) -->
+                    <div class="lg:col-span-5 space-y-6">
+
+                        <!-- Availability Status Badge -->
+                        <div
+                            class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-code text-xs">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span>Available for Freelance & Full-time</span>
+                        </div>
+
+                        <h3 class="text-xl sm:text-2xl font-bold font-heading text-white">Contact Information</h3>
+                        <p class="text-slate-400 text-xs sm:text-sm leading-relaxed">
+                            Feel free to send me a direct message through the form or reach out via any of the channels
+                            below.
+                        </p>
+
+                        <!-- Email Card -->
+                        <div
+                            class="p-4 rounded-2xl bg-navy-950/80 border border-slate-800 hover:border-cyan-light/40 transition-all group">
+                            <div class="text-[11px] font-code text-slate-500 uppercase tracking-wider mb-1">Direct Email
+                            </div>
+                            <div class="flex items-center justify-between gap-2">
+                                <span id="email-address"
+                                    class="font-code text-cyan-light text-xs sm:text-base font-semibold select-all break-all">
+                                    arvaamehmood11@gmail.com
+                                </span>
+                                <button onclick="copyEmailToClipboard()" title="Copy Email"
+                                    class="p-2 rounded-xl bg-navy-900 border border-slate-800 text-slate-400 hover:text-white hover:border-cyan-light/50 transition-all shrink-0 active:scale-95">
+                                    <i class="fa-solid fa-copy text-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Quick Info Items -->
+                        <div class="space-y-3 font-code text-xs">
+                            <div class="flex items-center gap-3 text-slate-300">
+                                <div
+                                    class="w-8 h-8 rounded-lg bg-cyan-light/10 border border-cyan-light/30 flex items-center justify-center text-cyan-light shrink-0">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                </div>
+                                <span>Location: Pakistan (Open to Remote Worldwide)</span>
+                            </div>
+
+                            <div class="flex items-center gap-3 text-slate-300">
+                                <div
+                                    class="w-8 h-8 rounded-lg bg-cyan-light/10 border border-cyan-light/30 flex items-center justify-center text-cyan-light shrink-0">
+                                    <i class="fa-solid fa-clock"></i>
+                                </div>
+                                <span>Response Time: Within 24 Hours</span>
+                            </div>
+                        </div>
+
+                        <!-- Social Action Buttons -->
+                        <div class="pt-4 flex flex-wrap gap-3 font-code text-xs">
+                            <a href="https://github.com/Arvaa11/" target="_blank"
+                                class="flex-1 py-3 px-4 rounded-xl bg-navy-950 border border-slate-800 text-slate-200 hover:text-cyan-light hover:border-cyan-light/40 transition-all flex items-center justify-center gap-2">
+                                <i class="fa-brands fa-github text-base"></i> GitHub
+                            </a>
+                            <button onclick="openGmailCompose()"
+                                class="flex-1 py-3 px-4 rounded-xl bg-navy-950 border border-slate-800 text-slate-200 hover:text-cyan-light hover:border-cyan-light/40 transition-all flex items-center justify-center gap-2 cursor-pointer">
+                                <i class="fa-solid fa-paper-plane text-xs text-cyan-light"></i> Open Gmail
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <!-- Right Direct Form Panel (Span 7) -->
+                    <div class="lg:col-span-7 bg-navy-950/60 border border-slate-800/80 p-6 sm:p-8 rounded-2xl">
+                        <!-- Replace 'YOUR_FORMSPREE_ID' with your real ID from formspree.io -->
+                        <form id="contact-form" action="https://formspree.io/f/xoevdqgv" method="POST"
+                            onsubmit="handleFormSubmit(event)" class="space-y-4">
+
+                            <div>
+                                <label for="user_name" class="block font-code text-xs text-slate-400 mb-1.5">Your
+                                    Name</label>
+                                <input type="text" id="user_name" name="name" required placeholder="John Doe"
+                                    class="w-full px-4 py-3 rounded-xl bg-navy-900 border border-slate-800 text-white placeholder-slate-600 focus:outline-none focus:border-cyan-light text-sm transition-all">
+                            </div>
+
+                            <div>
+                                <label for="user_email" class="block font-code text-xs text-slate-400 mb-1.5">Your
+                                    Email</label>
+                                <input type="email" id="user_email" name="email" required placeholder="john@example.com"
+                                    class="w-full px-4 py-3 rounded-xl bg-navy-900 border border-slate-800 text-white placeholder-slate-600 focus:outline-none focus:border-cyan-light text-sm transition-all">
+                            </div>
+
+                            <div>
+                                <label for="user_message"
+                                    class="block font-code text-xs text-slate-400 mb-1.5">Message</label>
+                                <textarea id="user_message" name="message" rows="4" required
+                                    placeholder="Hi Arwa, I'd like to talk about a project..."
+                                    class="w-full px-4 py-3 rounded-xl bg-navy-900 border border-slate-800 text-white placeholder-slate-600 focus:outline-none focus:border-cyan-light text-sm transition-all resize-none"></textarea>
+                            </div>
+
+                            <button type="submit" id="submit-btn"
+                                class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-cyan-light to-cyan-electric text-navy-950 font-bold font-code text-sm hover:opacity-90 active:scale-[0.99] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_20px_rgba(0,240,255,0.2)]">
+                                <i class="fa-solid fa-paper-plane"></i>
+                                <span id="btn-text">Send Message</span>
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+
+                <!-- Footer Copyright Bar -->
+                <div
+                    class="mt-12 pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between text-xs font-code text-slate-500 gap-2 text-center sm:text-left">
+                    <span>Designed & Built by Arwa Mahmood</span>
+                    <span>&copy; 2026. All rights reserved.</span>
+                </div>
+
+            </div>
+
+            <!-- Toast Notification Popup -->
+            <div id="toast-msg"
+                class="fixed bottom-6 right-6 translate-y-20 opacity-0 bg-navy-900 border border-cyan-light text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-xs font-code transition-all duration-300 z-50 pointer-events-none">
+                <i class="fa-solid fa-circle-check text-cyan-light text-base"></i>
+                <span id="toast-text">Email copied to clipboard!</span>
+            </div>
+
+        </section>
+
+        <!-- Scripts -->
+        <script>
+            const EMAIL_ADDRESS = "arvaamehmood11@gmail.com";
+
+            function showToast(message) {
+                const toast = document.getElementById('toast-msg');
+                const toastText = document.getElementById('toast-text');
+                if (!toast || !toastText) return;
+
+                toastText.textContent = message;
+                toast.classList.remove('translate-y-20', 'opacity-0');
+                toast.classList.add('translate-y-0', 'opacity-100');
+
+                setTimeout(() => {
+                    toast.classList.remove('translate-y-0', 'opacity-100');
+                    toast.classList.add('translate-y-20', 'opacity-0');
+                }, 3000);
+            }
+
+            function copyEmailToClipboard() {
+                navigator.clipboard.writeText(EMAIL_ADDRESS).then(() => {
+                    showToast("Copied email to clipboard!");
+                }).catch(() => {
+                    showToast("Failed to copy email.");
+                });
+            }
+
+            function openGmailCompose() {
+                window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${EMAIL_ADDRESS}`, '_blank');
+            }
+
+            async function handleFormSubmit(event) {
+                event.preventDefault();
+                const form = event.target;
+                const btnText = document.getElementById('btn-text');
+                const submitBtn = document.getElementById('submit-btn');
+
+                btnText.textContent = "Sending...";
+                submitBtn.disabled = true;
+
+                try {
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: new FormData(form),
+                        headers: { 'Accept': 'application/json' }
+                    });
+
+                    if (response.ok) {
+                        showToast("Message sent successfully!");
+                        form.reset();
+                    } else {
+                        showToast("Failed to send message. Try again later.");
+                    }
+                } catch (error) {
+                    showToast("Network error. Please try again.");
+                } finally {
+                    btnText.textContent = "Send Message";
+                    submitBtn.disabled = false;
+                }
+            }
+        </script>
+    </main>
+
+    <!-- JS Interactive Logic -->
+    <script>
+        // Smooth Lenis Scroll Setup
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            smooth: true
+        });
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+
+        // GSAP Plugins Registration
+        gsap.registerPlugin(TextPlugin, ScrollTrigger);
+
+        // GSAP Typewriter Animation Setup
+        const words = ["Frontend Developer", "React.js Specialist", "BSCS Student", "UI Experience Builder"];
+        let mainTimeline = gsap.timeline({ repeat: -1 });
+
+        words.forEach(word => {
+            let textTl = gsap.timeline({ repeat: 1, yoyo: true, repeatDelay: 1.5 });
+            textTl.to("#typewriter", { duration: 1.2, text: word, ease: "power1.inOut" });
+            mainTimeline.add(textTl);
+        });
+
+        // Hero Intro Animations
+        gsap.from(".hero-anim", {
+            opacity: 0,
+            y: 30,
+            duration: 1,
+            stagger: 0.15,
+            ease: "power3.out"
+        });
+
+        // Dual Ring Cursor
+        const dot = document.getElementById('cursor-dot');
+        const ring = document.getElementById('cursor-ring');
+
+        window.addEventListener('mousemove', (e) => {
+            gsap.to(dot, { x: e.clientX, y: e.clientY, duration: 0.1 });
+            gsap.to(ring, { x: e.clientX, y: e.clientY, duration: 0.25 });
+        });
+
+        // Three.js Particle Background Canvas
+        window.onload = function () {
+            const canvas = document.getElementById('webgl-bg');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            const count = 700;
+            const positions = new Float32Array(count * 3);
+            for (let i = 0; i < count * 3; i++) {
+                positions[i] = (Math.random() - 0.5) * 15;
+            }
+
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+            const material = new THREE.PointsMaterial({
+                size: 0.025,
+                color: 0x38bdf8,
+                transparent: true,
+                opacity: 0.5
+            });
+
+            const particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+
+            camera.position.z = 5;
+
+            let mouseX = 0;
+            let mouseY = 0;
+            window.addEventListener('mousemove', (e) => {
+                mouseX = (e.clientX / window.innerWidth) - 0.5;
+                mouseY = (e.clientY / window.innerHeight) - 0.5;
+            });
+
+            function animate() {
+                requestAnimationFrame(animate);
+                particles.rotation.y += 0.001;
+                particles.rotation.x += 0.0005;
+
+                camera.position.x += (mouseX * 0.5 - camera.position.x) * 0.05;
+                camera.position.y += (-mouseY * 0.5 - camera.position.y) * 0.05;
+
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        };
+    </script>
+</body>
+
+</html>
