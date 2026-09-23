@@ -18,12 +18,13 @@ The website focuses on:
 
 ## 🛠️ Technologies Used
 
-* HTML5
-* CSS3
-* JavaScript
-* Tailwind CSS
-* GSAP
-* ScrollTrigger
+• CSS3
+• JavaScript (ES6+)
+• Vite
+• Font Awesome
+• Google Fonts
+• Formspree
+• Git & GitHub
 
 ### Libraries
 
