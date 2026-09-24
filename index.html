@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark scroll-smooth">
+<html lang="en" class="dark">
 
 <head>
     <meta charset="UTF-8">
@@ -58,6 +58,26 @@
     <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
 
     <style>
+        html.lenis {
+            height: auto;
+        }
+
+        .lenis.lenis-smooth {
+            scroll-behavior: auto !important;
+        }
+
+        .lenis.lenis-smooth [data-lenis-prevent] {
+            overscroll-behavior: contain;
+        }
+
+        .lenis.lenis-stopped {
+            overflow: hidden;
+        }
+
+        .lenis.lenis-scrolling iframe {
+            pointer-events: none;
+        }
+
         body {
             background-color: #030712;
             color: #f8fafc;
@@ -279,7 +299,7 @@
                         </div>
 
                         <div
-                            class="font-code text-xs sm:text-sm text-slate-300 min-h-[36px] flex items-center gap-2 overflow-x-auto">
+                            class="font-code text-xs sm:text-sm text-slate-300 min-h-[36px] flex items-center gap-2 overflow-x-auto" data-lenis-prevent>
                             <span class="text-cyan-light font-bold shrink-0">$</span>
                             <span id="typewriter" class="text-white font-medium whitespace-nowrap"></span>
                             <span class="w-2 h-4 bg-cyan-glow shrink-0 inline-block animate-pulse"></span>
@@ -1722,20 +1742,24 @@
 
     <!-- JS Interactive Logic -->
     <script>
+        // GSAP Plugins Registration
+        gsap.registerPlugin(TextPlugin, ScrollTrigger);
+
         // Smooth Lenis Scroll Setup
         const lenis = new Lenis({
             duration: 1.2,
             easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-            smooth: true
+            smoothWheel: true,
+            smoothTouch: false
         });
-        function raf(time) {
-            lenis.raf(time);
-            requestAnimationFrame(raf);
-        }
-        requestAnimationFrame(raf);
 
-        // GSAP Plugins Registration
-        gsap.registerPlugin(TextPlugin, ScrollTrigger);
+        lenis.on('scroll', ScrollTrigger.update);
+
+        gsap.ticker.add((time) => {
+            lenis.raf(time * 1000);
+        });
+
+        gsap.ticker.lagSmoothing(0);
 
         // GSAP Typewriter Animation Setup
         const words = ["Frontend Developer", "React.js Specialist", "BSCS Student", "UI Experience Builder"];
